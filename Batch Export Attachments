@@ -1,0 +1,37 @@
+#Import necessary packages
+import arcpy
+import os
+import urllib.request
+
+# Set workspace and feature class path
+workspace = r"<Path of the geodatabase"
+fc_name = "Name of the feature class"
+
+# Create a search cursor to iterate through the features
+fields = ['OBJECTID', '<FieldName>']
+cursor = arcpy.da.SearchCursor(os.path.join(workspace, fc_name), fields)
+
+# Iterate through each feature
+for row in cursor:
+    object_id = row[0]
+    image_url = row[1]
+
+    try:
+        # Download the image attachment using URL
+        response = urllib.request.urlopen(image_url)
+
+        # Save the image with object ID as filename into specified folder (e.g., "Attachments" folder)
+        save_path = os.path.join(r"<Path of folder path where attachments have to be exported>", f"{object_id}.jpg")
+        
+        with open(save_path, 'wb') as out_file:
+            out_file.write(response.read())
+            
+        print(f"Attachment downloaded for Object ID: {object_id}")
+
+    except Exception as e:
+        print(f"Error downloading attachment for Object ID: {object_id}")
+        print(str(e))
+
+del cursor
+
+print("Attachments downloaded successfully.")
